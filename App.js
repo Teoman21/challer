@@ -16,7 +16,7 @@ const App = () => {
     <SafeAreaView style={styles.wrapper}>
       <NavigationContainer>
         <Tab.Navigator
-          initialRouteName="Swipe"
+          initialRouteName="Home"
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
