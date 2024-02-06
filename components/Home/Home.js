@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const defaultImage = require('../../assets/default.jpg');
+const defaultImage = require('../../data/images/hasbulla.jpeg');
 
 
 const Home = ({ navigation }) => {
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   userPhoto: {
+    alignItems: "center",
     width: 150,
     height: 150,
     borderRadius: 75,
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
   createChallengeButton: {
     position: 'absolute',
     bottom: 20,
-    left: 20,
+    right: 20,
   },
 });
 
