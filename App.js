@@ -8,6 +8,7 @@ import React from "react";
 import Messages from './components/Messages/Messages.js';
 import More from './components/More/More.js';
 import Home from './components/Home/Home.js';
+import Settings from './components/Home/Settings.js';
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +27,9 @@ const App = () => {
                 iconName = focused ? 'chatbox' : 'chatbox-outline';
               } else if (route.name === 'More') {
                 iconName = focused ? 'apps' : 'apps-outline';
-              } 
+              } else if (route.name === 'Settings') {
+                iconName = focused ? 'settings' : 'settings-outline'
+              }
               return <Icon name={iconName} size={size} color={color} />;
             },
             tabBarActiveTintColor: 'white',
@@ -45,6 +48,7 @@ const App = () => {
           <Tab.Screen name="Home" component={Home} />
           <Tab.Screen name="Messages" component={Messages} />
           <Tab.Screen name="More" component={More} />
+          <Tab.Screen name="Settings" component={Settings} />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaView>

@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 const defaultImage = require('../../data/images/hasbulla.jpeg');
 
-
 const Home = ({ navigation }) => {
   const [totalPoints, setTotalPoints] = React.useState(100);
   // Example medal counts
@@ -21,13 +20,21 @@ const Home = ({ navigation }) => {
     { name: 'Challenge 3' },
   ];
 
+  // Function to navigate to the Settings page
+  const navigateToSettings = () => {
+    navigation.navigate('Settings');
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileSection}>
-        <Image
-          source={ defaultImage } // Placeholder image URL
-          style={styles.userPhoto}
-        />
+        {/* navigates to settings page when clicked */}
+        <TouchableOpacity onPress={navigateToSettings}>
+          <Image
+            source={defaultImage} // Placeholder image URL
+            style={styles.userPhoto}
+          />
+        </TouchableOpacity>
         <Text style={styles.points}>Total Points: {totalPoints}</Text>
         <View style={styles.medalsContainer}>
           <Text style={styles.medalText}>🥇 x {medals.gold}</Text>
@@ -45,7 +52,7 @@ const Home = ({ navigation }) => {
       </View>
       <TouchableOpacity
         style={styles.createChallengeButton}
-        onPress={() => navigation.navigate('CreateChallenge')}// WWill be implemented later this page
+        onPress={() => navigation.navigate('CreateChallenge')} // Will be implemented later this page
       >
         <Ionicons name="add-circle" size={64} color="dodgerblue" />
       </TouchableOpacity>
@@ -55,7 +62,7 @@ const Home = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     padding: 20,
   },
   profileSection: {
@@ -63,7 +70,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   userPhoto: {
-    alignItems: "center",
     width: 150,
     height: 150,
     borderRadius: 75,
