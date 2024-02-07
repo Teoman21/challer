@@ -8,7 +8,7 @@ import React from "react";
 import Messages from './components/Messages/Messages.js';
 import More from './components/More/More.js';
 import Home from './components/Home/Home.js';
-import Settings from './components/Home/Settings.js';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -48,7 +48,6 @@ const App = () => {
           <Tab.Screen name="Home" component={Home} />
           <Tab.Screen name="Messages" component={Messages} />
           <Tab.Screen name="More" component={More} />
-          <Tab.Screen name="Settings" component={Settings} />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaView>
