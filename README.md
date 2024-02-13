@@ -1,12 +1,17 @@
-HOW TO INSTALL:
+##TODOS: 
+**If you would like any task please update Readme*
 --------------------------------------------------
-Clone the Repository:
+### Front-end of components
 
-git clone https://github.com/Teoman21/challer.git
+- Message component and setting(More) will be done.
+- Need a logout and signup button for the front end (Done in the backend)
+- Maybe routing from the home page to messages when clicking the challenge will go into the group chat of that challenge
 
-Install Dependencies:
+### Back-end model designs for necessary components:
+- Need a challenge section user model after challange created(with necessary users added) will create conversation group chat
+- Need a photo model(I assume this will be researched later as to how to store the photo data in Mongodb) to send to the group chat and get a point also only send 1 photo per day by users.
 
-npm install
+--------------------------------------------------
 
 ## GIT COMMANDS  YOU SHOULD KNOW
 
