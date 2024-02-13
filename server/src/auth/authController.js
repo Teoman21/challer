@@ -2,9 +2,11 @@ const User = require("./userModel");
 const { createToken } = require("../utils/tokenCreate")
 const bcrypt = require("bcryptjs");
 
+// PASSIVE: End-user has no this functionality.
 module.exports.Signup = async (req, res) => {
     try {
-        const { email, password, fullName, createdAt, phoneNumber } = req.body;
+        const { email, password, fullName, createdAt } = req.body;
+        console.log("in");
         console.log(req.body);
 
         const existingUser = await User.findOne({ email });
@@ -12,11 +14,14 @@ module.exports.Signup = async (req, res) => {
         if (existingUser) {
             return res.json({ message: "User already exists!" });
         }
-        const user = await User.create({ email, password, fullName, createdAt, phoneNumber });
+        const user = await User.create({ email, password, fullName, createdAt });
 
-        const token = createToken(user._id);
+        createToken(user._id);
 
-        res.status(201).json({ message: "User signed up successfully.", success: true, userDetails: user });
+        // omitting the password from the response
+        const userForResponse = { ...user._doc, password: undefined };
+
+        res.status(201).json({ message: "User signed up successfully.", success: true, userDetails: userForResponse,  });
 
     } catch (error) {
         console.error(error);
@@ -36,13 +41,13 @@ module.exports.Login = async (req, res) => {
             return res.json({ message: "Invalid email or password" })
         }
 
-        const auth = await bcrypt.compare(password, user.password)
+        const auth = bcrypt.compare(password, user.password)
         if (!auth) {
-            return res.json({ messgae: "Invalid email or password" })
+            return res.json({ message: "Invalid email or password" })
         }
 
         const token = createToken(user._id);
-        res.status(201).json({ message: "User logged in successfully.", success: true, token });
+        res.status(201).json({ message: "User logged in successfully.", success: true, token, userId: user._id, userDetails: user.userDetails});
     }
     catch (err) {
         console.error(err);

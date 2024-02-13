@@ -8,6 +8,8 @@ const conversationRoute = require("./message/routes/conversations")
 
 // require cookie parser
 require("dotenv").config();
+//import middlewares
+const { verifyToken } = require("./middlewares/verifyToken");
 
 const { MONGOURL, PORT } = process.env;
 if (!MONGOURL || !PORT) {
@@ -42,6 +44,9 @@ app.use((req, res, next) => {
 
 // Controllers
 app.use("/auth", authRoute);
+
+app.use("/api", verifyToken);
+
 app.use("api/messages",messageRoute);
 app.use("api/conversations",conversationRoute);
 
