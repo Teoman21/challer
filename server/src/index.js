@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require('cors');
 
 const authRoute = require("./auth/authRoute");
+const messageRoute = require("./message/routes/messages")
+const conversationRoute = require("./message/routes/conversations")
 
 // require cookie parser
 require("dotenv").config();
@@ -40,6 +42,8 @@ app.use((req, res, next) => {
 
 // Controllers
 app.use("/auth", authRoute);
+app.use("api/messages",messageRoute);
+app.use("api/conversations",conversationRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
