@@ -1,3 +1,8 @@
+##Important:
+---------------------------------------------
+**If you cant open app (dont have simulator or smt):
+-Use Your Local Network IP: Instead of using localhost or 127.0.0.1 in your API URL, use your computer's local network IP address (e.g., 192.168.x.x). This makes the backend accessible to devices on your local network.
+
 ##TODOS: 
 **If you would like any task please update Readme*
 --------------------------------------------------
