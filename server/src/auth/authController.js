@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 // PASSIVE: End-user has no this functionality.
 module.exports.Signup = async (req, res) => {
     try {
-        const { email, password, fullName, createdAt } = req.body;
+        const { email, password, fullName, createdAt, phoneNumber } = req.body;
         console.log("in");
         console.log(req.body);
 
@@ -14,7 +14,7 @@ module.exports.Signup = async (req, res) => {
         if (existingUser) {
             return res.json({ message: "User already exists!" });
         }
-        const user = await User.create({ email, password, fullName, createdAt });
+        const user = await User.create({ email, password, fullName, createdAt, phoneNumber });
 
         createToken(user._id);
 

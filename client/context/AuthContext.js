@@ -38,6 +38,36 @@ export const AuthProvider = ({children}) => {
         setIsLoading(false);
     };
 
+    const signUpContext = async (email, password, fullName, phoneNumber) => {
+        setIsLoading(true);
+        try {
+            const response = await axios.post('http://localhost:3030/auth/signup', {
+                email,
+                password,
+                phoneNumber,
+                fullName
+            });
+            console.log("SIGNUP ATTEMPT: ", response.data.message);
+            if(response.data && response.data.token && response.data.userId) {
+                const { token, userId } = response.data;
+                setUserToken(token);
+                setUserID(userId);
+                // Optionally set user info if your backend returns it
+                await AsyncStorage.setItem('userToken', JSON.stringify(token));
+                await AsyncStorage.setItem('userId', JSON.stringify(userId));
+                // Navigate to the app's main flow or show a success message
+            } else {
+                console.log('Signup failed', response.data.message);
+                // Handle signup failure, e.g., by setting an error state
+            }
+        } catch (error) {
+            console.log(`Signup error: ${error}`);
+            // Handle errors, e.g., by setting an error state
+        }
+        setIsLoading(false);
+    };
+    
+
     const logoutContext = () => {
         setIsLoading(true);
         setUserToken(null);
@@ -77,7 +107,7 @@ export const AuthProvider = ({children}) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{loginContext, logoutContext, isLoading, userToken, userID}}>
+        <AuthContext.Provider value={{loginContext, logoutContext, signUpContext, isLoading, userToken, userID}}>
             {children}
         </AuthContext.Provider>
     );
