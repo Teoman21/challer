@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
     fullName: { type: String, required: true },
     phoneNumber: { type: String, required:true },
-    challanges: {type: String}
+    challanges: {type: Array}
 });
 
 

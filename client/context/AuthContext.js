@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useDeferredValue } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { ENDPOINTS } from "../config/Config";
 
 // create and export the context (so we can access it from any file)
 export const AuthContext = createContext();
@@ -14,7 +15,7 @@ export const AuthProvider = ({children}) => {
     const loginContext = async (email, password) => {
         setIsLoading(true);
         try{
-            const response = await axios.post('http://localhost:3030/auth/login', {
+            const response = await axios.post(ENDPOINTS.LOGIN, {
                 email,
                 password
             });
@@ -41,7 +42,7 @@ export const AuthProvider = ({children}) => {
     const signUpContext = async (email, password, fullName, phoneNumber) => {
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost:3030/auth/signup', {
+            const response = await axios.post(ENDPOINTS.SIGN_UP, {
                 email,
                 password,
                 phoneNumber,
