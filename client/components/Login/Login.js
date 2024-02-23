@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Dimensions } from "react-native";
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext.js';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const Login = () => {
     const { loginContext } = useContext(AuthContext);
@@ -15,10 +15,12 @@ const Login = () => {
     const [error, setError] = useState("");
 
     return (
-        <View style={styles.container}>
+        <LinearGradient colors={['#6a11cb', '#2575fc']} style={styles.container}>
+            <Text style={styles.title}>Welcome Back!</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Email"
+                placeholderTextColor="#ccc"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -27,15 +29,20 @@ const Login = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Password"
+                placeholderTextColor="#ccc"
                 value={password}
                 secureTextEntry
                 onChangeText={setPassword}
                 autoCapitalize="none"
             />
-            <Button title="Login" onPress={() => loginContext(email, password)} />
+            <TouchableOpacity style={styles.button} onPress={() => loginContext(email, password)}>
+                <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <Button title="Don't have an account? Sign Up" onPress={() => navigation.navigate('SignUp')} />
-        </View>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.signUpText}>Don't have an account? Sign Up</Text>
+            </TouchableOpacity>
+        </LinearGradient>
     );
 };
 
@@ -43,20 +50,48 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        padding: 20,
+    },
+    title: {
+        fontSize: 28,
+        color: 'white',
+        marginBottom: 20,
+        fontWeight: 'bold',
     },
     input: {
         width: width * 0.8,
-        height: 40,
-        borderColor: "gray",
+        height: 50,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: "transparent",
         borderWidth: 1,
         marginBottom: 20,
-        padding: 10
+        padding: 10,
+        borderRadius: 25,
+        color: '#fff',
+    },
+    button: {
+        width: width * 0.8,
+        backgroundColor: '#ff8c00',
+        padding: 15,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     errorText: {
         color: 'red',
-        marginTop: 10
-    }
+        marginTop: 10,
+    },
+    signUpText: {
+        color: '#fff',
+        marginTop: 20,
+    },
 });
 
 export default Login;
