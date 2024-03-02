@@ -1,96 +1,64 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useContext } from 'react';
+import { SafeAreaView, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const defaultImage = require('../../data/images/hasbulla.jpeg');
+import { AuthContext } from '../../context/AuthContext.js'
 
-const SettingsPage = ({ navigation }) => {
-  // Example user data (replace with your actual user data)
-  const user = {
-    name: 'Hasbulla Magomedov',
-    username: 'hasbik',
-    bio: 'I want to punish Conor McGregor, he talks too much.'
-    // Add more user data such as profile photo URL if needed
-  };
+const MoreScreen = () => {
 
-  // Function to handle navigation back to the home page
-  const navigateBack = () => {
-    navigation.goBack();
-  };
+    const { logoutContext } = useContext(AuthContext);
 
-  return (
-    <View style={styles.container}>
-      {/* Profile photo */}
-      <Image
-        source={ defaultImage }
-        style={styles.profilePhoto}
-      />
+    const navigation = useNavigation();
 
-      {/* Name */}
-      <Text style={styles.name}>{user.name}</Text>
+    const handleEditProfilePress = () => {
+        navigation.navigate('EditProfile');
+    };
 
-      {/* Username */}
-      <Text style={styles.username}>@{user.username}</Text>
+    const handleSettingsPress = () => {
+        navigation.navigate('Settings');
+    };
 
-      {/* Bio */}
-      <View style={styles.bioContainer}>
-        <Text style={styles.bioText}>{user.bio}</Text>
-      </View>
+    const handleLogoutPress = () => {
+        logoutContext () ;
+    };
 
-      {/* Button to navigate back to home page */}
-      <TouchableOpacity
-        onPress={navigateBack}
-        style={styles.backButton}
-      >
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={handleEditProfilePress} style={styles.button}>
+                    <Text style={styles.buttonText}>Edit Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSettingsPress} style={styles.button}>
+                    <Text style={styles.buttonText}>Settings</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogoutPress} style={styles.button}>
+                    <Text style={styles.buttonText}>Logout</Text>
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20
-  },
-  profilePhoto: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 10
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 5
-  },
-  username: {
-    fontSize: 16,
-    marginBottom: 10
-  },
-  bioContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20
-  },
-  bioText: {
-    fontSize: 14
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderRadius: 5
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: 'white'
-  }
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    button: {
+        backgroundColor: '#007bff', // Use your theme color here
+        padding: 15,
+        marginVertical: 10,
+        width: '100%',
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
 });
 
-export default SettingsPage;
+export default MoreScreen;
