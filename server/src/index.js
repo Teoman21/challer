@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const cors = require('cors');
 
 const authRoute = require("./auth/authRoute");
-const messageRoute = require("./message/routes/messages")
-const conversationRoute = require("./message/routes/conversations")
+const challengeRoute = require("./challenges/challengeRouter");
+
+/* comented oout the v erification token because there is a bugi in verifutoken cant 
+cant sent request will be handled the bug later*/ 
 
 // require cookie parser
 require("dotenv").config();
@@ -46,9 +48,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRoute);
 
 app.use("/api", verifyToken);
-
-app.use("api/messages",messageRoute);
-app.use("api/conversations",conversationRoute);
+app.use("/api/challenge",challengeRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
