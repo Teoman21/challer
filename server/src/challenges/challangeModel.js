@@ -12,7 +12,7 @@ const challengeSchema = new mongoose.Schema({
     endDate: { type: Date, required: true },
     submissions: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'PhotoSubmission'
+        ref: 'Submission'
     }]
     // Consider adding a status field to indicate if the challenge is active, completed, etc.
 });

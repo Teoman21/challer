@@ -14,12 +14,12 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [username, setUsername] = useState("");
     const [error, setError] = useState("");
 
     const handleSignUp = async () => {
         try {
-            await signUpContext(email, password, fullName, phoneNumber);
+            await signUpContext(email, password, fullName, username);
             navigation.goBack();
         } catch (e) {
             setError(e.message);
@@ -42,11 +42,10 @@ const SignUp = () => {
                     />
                     <TextInput
                         style={styles.input}
-                        placeholder="Phone Number"
+                        placeholder="User name"
                         placeholderTextColor="#fff"
-                        keyboardType="phone-pad"
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
+                        value={username}
+                        onChangeText={setUsername}
                     />
                     <TextInput
                         style={styles.input}
