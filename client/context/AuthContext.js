@@ -39,13 +39,13 @@ export const AuthProvider = ({children}) => {
         setIsLoading(false);
     };
 
-    const signUpContext = async (email, password, fullName, phoneNumber) => {
+    const signUpContext = async (email, password, fullName, username) => {
         setIsLoading(true);
         try {
             const response = await axios.post(ENDPOINTS.SIGN_UP, {
                 email,
                 password,
-                phoneNumber,
+                username,
                 fullName
             });
             console.log("SIGNUP ATTEMPT: ", response.data.message);

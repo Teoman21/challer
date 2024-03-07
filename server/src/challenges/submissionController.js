@@ -1,5 +1,5 @@
-const Submission = require('../models/Submission');
-const Challenge = require('../models/Challenge');
+const Submission = require('../challenges/submissionModel');
+const Challenge = require('../challenges/challangeModel');
 const moment = require('moment');
 
 exports.addSubmission = async (req, res) => {
