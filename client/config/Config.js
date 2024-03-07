@@ -14,11 +14,24 @@ if (__DEV__) {
         BASE_URL = 'http://192.168.1.7:3030'; // Replace with your LAN IP for physical device testing
     }
 } else {
-    BASE_URL = 'https://your-production-api.com';// will be handled later
+    BASE_URL = 'https://your-production-api.com'; // will be handled later
 }
+
+// Define functions for endpoints that need to incorporate dynamic values
+const getChallengeEndpoint = (userID) => `${BASE_URL}/api/challenge/getChallenge/${userID}`;
+const inviteToChallengeEndpoint = (challengeId) => `${BASE_URL}/api/challenge/${challengeId}/invite`;
+const acceptInvitationEndpoint = (challengeId) => `${BASE_URL}/api/challenge/${challengeId}/accept`;
+const getInvitationsEndpoint = (userId) => `${BASE_URL}/api/challenge/${userId}/invitations`;
 
 export const ENDPOINTS = {
     LOGIN: `${BASE_URL}/auth/login`,
     SIGN_UP: `${BASE_URL}/auth/signup`,
-    // other endpoint will go here
+    CREATE_CHALLENGE: `${BASE_URL}/api/challenge/createChallenge`,
+    // Other endpoints as constants
+    // Dynamic endpoint as a function
+    getChallenge: getChallengeEndpoint,
+    inviteToChallenge: inviteToChallengeEndpoint,
+    acceptInvitation: acceptInvitationEndpoint,
+    getInvitations: getInvitationsEndpoint,
+    // other endpoint functions will go here
 };

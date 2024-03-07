@@ -1,35 +1,35 @@
-// Import the Challenge model
-const Challenge = require('./challangeModel'); // Adjust the path as necessary
-const moment = require('moment'); // A handy library for date calculations
-
-
-//CREATE A NEW CHALLENGE
+const Challenge = require('./challangeModel');
+const User = require('../auth/userModel'); 
+const moment = require('moment');
 
 exports.createChallenge = async (req, res) => {
     try {
-        const { challengeName, initialPotAmount, creatorId, participants, startDate, duration, invitations } = req.body;
-
+        const { challengeName, initialPotAmount, creatorId, participants, startDate, duration, usernames, endDate: endDateRaw } = req.body;
         // Validate challenge duration
-        if (duration < 15 || duration > 90) {
-            return res.status(400).json({ message: 'Challenge duration must be between 15 and 90 days.' });
+        if (!endDateRaw && (duration < 15 || duration > 90)) {
+            return res.status(400).json({ message: 'Challenge duration must be between 15 and 90 days or an endDate must be provided.' });
         }
 
         // Calculate the end date by adding the duration to the start date
-        const endDate = moment(startDate).add(duration, 'days').toDate();
+        const endDate = endDateRaw ? new Date(endDateRaw) : moment(startDate).add(duration, 'days').toDate();
 
-        // Initial transaction from the challenge creator
-        const transactions = [{
-            participant: creatorId,
-            amount: initialPotAmount
-        }];
+        // Find users by usernames and get their IDs
+        const users = await User.find({ username: { $in: usernames } });
+
+        // If any usernames are not found, you can handle it by returning an error or skipping them
+        const invitedUserIds = users.map(user => user._id);
 
         // Create the challenge object
         const challenge = new Challenge({
             challengeName,
             potAmount: initialPotAmount,
             participants: [creatorId], // Include the creator as a participant
-            invitations,
-            transactions,
+            invitations: invitedUserIds, // Add the invited users' IDs
+            // Assuming 'transactions' is a part of your schema and you want to track the initial pot contribution
+            transactions: [{
+                participant: creatorId,
+                amount: initialPotAmount
+            }],
             startDate,
             endDate,
             duration
@@ -37,6 +37,9 @@ exports.createChallenge = async (req, res) => {
 
         // Save the new challenge to the database
         const savedChallenge = await challenge.save();
+
+        // If you want to send notifications to invited users, do it here
+
         // If all goes well, send back the created challenge
         res.status(201).json(savedChallenge);
     } catch (error) {
@@ -45,47 +48,24 @@ exports.createChallenge = async (req, res) => {
     }
 };
 
-
-
-exports.sendInvitation = async (req, res) => {
-    const { email } = req.body; // Email of the friend to invite
-    const challengeId = req.params.challengeId;
+exports.getUserChallenges = async (req, res) => {
+    const userId = req.params.userId; // or req.user._id if extracting from JWT token
 
     try {
-        const challenge = await Challenge.findById(challengeId);
-        if (!challenge) {
-            return res.status(404).send('Challenge not found.');
-        }
+        // Find challenges where the user is a participant
+        const participantChallenges = await Challenge.find({ participants: userId });
+        
+        // Optionally, find challenges where the user is the creator
+        // Adjust this query based on your schema's way of tracking challenge creators
+        const creatorChallenges = await Challenge.find({ 'transactions.participant': userId });
 
-        // Here, implement your logic for generating an invitation code or link
-        const invitationCode = generateInvitationCode(challengeId, email);
+        // Combine the challenges from both queries
+        // Note: This simplistic approach may include duplicates if a user is both participant and creator
+        const combinedChallenges = [...participantChallenges, ...creatorChallenges];
 
-        // Optionally, save the invitation details to the challenge document or a separate invitation collection
-
-        // Send the invitation via email or another appropriate method
-        sendInvitationEmail(email, invitationCode);
-
-        res.status(200).send('Invitation sent successfully.');
+        res.json(combinedChallenges);
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error('Failed to get user challenges:', error);
+        res.status(500).send('Error retrieving user challenges');
     }
 };
-
-exports.acceptInvitation = async (req, res) => {
-    const { invitationCode } = req.body; // The invitation code from the invite link or email
-
-    // Decode the invitationCode to find the corresponding challenge and verify its validity
-    const { challengeId, email } = decodeInvitationCode(invitationCode);
-
-    try {
-        // Here, you would verify the invitation and add the user to the challenge's participants
-        // This might involve finding the challenge by ID, checking that the invitation is valid,
-        // and then updating the challenge document to include the new participant
-
-        res.status(200).send('You have successfully joined the challenge.');
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-};
-
-// You might also include a declineInvitation method here, following a similar pattern

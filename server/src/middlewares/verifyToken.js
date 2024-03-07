@@ -17,7 +17,7 @@ module.exports.verifyToken = (req, res, next) => {
 
         const token = authHeader.slice(7);
 
-        jwt.verify(token, process.env.TOKENKEY, async (err, data) => {
+        jwt.verify(token, process.env.TOKEN_KEY, async (err, data) => {
             try {
                 if (err) {
                     return res.status(401).json({
