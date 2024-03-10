@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const authRoute = require("./auth/authRoute");
 const challengeRoute = require("./challenges/challengeRouter");
+const messageRoute = require("./messages/messageRouter");
 
 /* comented oout the v erification token because there is a bugi in verifutoken cant 
 cant sent request will be handled the bug later*/ 
@@ -11,7 +12,7 @@ cant sent request will be handled the bug later*/
 // require cookie parser
 require("dotenv").config();
 //import middlewares
-//const { verifyToken } = require("./middlewares/verifyToken");
+const { verifyToken } = require("./middlewares/verifyToken");
 
 const { MONGOURL, PORT } = process.env;
 if (!MONGOURL || !PORT) {
@@ -47,8 +48,10 @@ app.use((req, res, next) => {
 // Controllers
 app.use("/auth", authRoute);
 
-//app.use("/api", verifyToken);
+app.use("/api", verifyToken);
+
 app.use("/api/challenge",challengeRoute);
+app.use("/api/message",messageRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
