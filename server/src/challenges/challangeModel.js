@@ -41,7 +41,7 @@ const challengeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User', // Adjust 'User' to match the name of your user schema
       },
-    // Add other fields or indexes as needed
+      points: [{ userId: mongoose.Schema.Types.ObjectId, points: Number }],
 });
 
 

@@ -6,7 +6,7 @@ import { AuthContext } from '../../context/AuthContext.js'
 
 const MoreScreen = () => {
 
-    const { logoutContext } = useContext(AuthContext);
+    const { logoutContext, deleteAccountContext } = useContext(AuthContext);
 
     const navigation = useNavigation();
 
@@ -18,6 +18,10 @@ const MoreScreen = () => {
         navigation.navigate('Settings');
     };
 
+    const handleDeleteAccountPress = () =>{
+        deleteAccountContext();
+    }
+
     const handleLogoutPress = () => {
         logoutContext () ;
     };
@@ -28,8 +32,8 @@ const MoreScreen = () => {
                 <TouchableOpacity onPress={handleEditProfilePress} style={styles.button}>
                     <Text style={styles.buttonText}>Edit Profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleSettingsPress} style={styles.button}>
-                    <Text style={styles.buttonText}>Settings</Text>
+                <TouchableOpacity onPress={handleDeleteAccountPress} style={styles.button}>
+                    <Text style={styles.buttonText}>Delete Account</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleLogoutPress} style={styles.button}>
                     <Text style={styles.buttonText}>Logout</Text>

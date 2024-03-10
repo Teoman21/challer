@@ -67,6 +67,32 @@ export const AuthProvider = ({children}) => {
         }
         setIsLoading(false);
     };
+
+    const deleteAccountContext = async () => {
+        setIsLoading(true);
+        try {
+            // Assuming the DELETE endpoint for deleting an account is '/auth/deleteAccount' and requires a Bearer token
+            const response = await axios.delete(ENDPOINTS.DELETE_ACCOUNT, {
+                headers: {
+                    Authorization: `Bearer ${userToken}`,
+                },
+            });
+            console.log("DELETE ACCOUNT ATTEMPT: ", response.data.message);
+            // Handle successful account deletion
+            if(response.status === 200) {
+                logoutContext(); // Clean up local state and storage
+                // Navigate to the login screen or show a success message
+            } else {
+                console.log('Delete account failed', response.data.message);
+                // Handle deletion failure, e.g., by showing an error message
+            }
+        } catch (error) {
+            console.log(`Delete account error: ${error}`);
+            // Handle errors, e.g., by showing an error message
+        }
+        setIsLoading(false);
+    };
+
     
 
     const logoutContext = () => {
@@ -108,7 +134,7 @@ export const AuthProvider = ({children}) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{loginContext, logoutContext, signUpContext, isLoading, userToken, userID}}>
+        <AuthContext.Provider value={{loginContext, logoutContext, signUpContext, deleteAccountContext, isLoading, userToken, userID}}>
             {children}
         </AuthContext.Provider>
     );

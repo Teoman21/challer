@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const authRoute = require("./auth/authRoute");
 const challengeRoute = require("./challenges/challengeRouter");
+const messageRoute = require("./messages/messageRouter");
 
 /* comented oout the v erification token because there is a bugi in verifutoken cant 
 cant sent request will be handled the bug later*/ 
@@ -48,7 +49,9 @@ app.use((req, res, next) => {
 app.use("/auth", authRoute);
 
 app.use("/api", verifyToken);
+
 app.use("/api/challenge",challengeRoute);
+app.use("/api/message",messageRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

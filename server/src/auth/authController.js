@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 module.exports.Signup = async (req, res) => {
     try {
         const { email, password, fullName, createdAt, username } = req.body;
-        console.log("in");
         console.log(req.body);
 
         const existingUser = await User.findOne({ email });
@@ -73,5 +72,24 @@ module.exports.Logout = (req, res, next) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error!" });
+    }
+};
+
+module.exports.DeleteAccount = async (req, res) => {
+    try {
+        // req.user is set by your verifyToken middleware
+        const userId = req.user._id; // or directly use req.user.id if it's available
+
+        const deletedUser = await User.findByIdAndDelete(userId);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Successfully deleted the user
+        res.status(200).json({ message: "Account deleted successfully.", success: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };

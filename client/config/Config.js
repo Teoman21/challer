@@ -26,6 +26,7 @@ const getInvitationsEndpoint = (userId) => `${BASE_URL}/api/challenge/${userId}/
 export const ENDPOINTS = {
     LOGIN: `${BASE_URL}/auth/login`,
     SIGN_UP: `${BASE_URL}/auth/signup`,
+    DELETE_ACCOUNT: `${BASE_URL}/auth/deleteAccount`,
     CREATE_CHALLENGE: `${BASE_URL}/api/challenge/createChallenge`,
     // Other endpoints as constants
     // Dynamic endpoint as a function
