@@ -12,11 +12,6 @@ const Stack = createNativeStackNavigator();
 // Assuming defaultImage is a local asset. Adjust the path as necessary.
 const defaultImage = require('../../data/images/hasbulla.jpeg');
 
-const dummyNotifications = [
-  { id: '1', message: 'You have a new challenge invitation!' },
-  { id: '2', message: 'Your challenge starts tomorrow.' },
-  // Add more dummy notifications here
-];
 
 // Profile component
 const Profile = ({ navigation }) => {

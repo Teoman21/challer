@@ -22,17 +22,20 @@ const getChallengeEndpoint = (userID) => `${BASE_URL}/api/challenge/getChallenge
 const inviteToChallengeEndpoint = (challengeId) => `${BASE_URL}/api/challenge/${challengeId}/invite`;
 const acceptInvitationEndpoint = (challengeId) => `${BASE_URL}/api/challenge/${challengeId}/accept`;
 const getInvitationsEndpoint = (userId) => `${BASE_URL}/api/challenge/${userId}/invitations`;
+const  getMessagesEndpoint = (challengeId) =>`${BASE_URL}/api/message/${challengeId}`;
 
 export const ENDPOINTS = {
     LOGIN: `${BASE_URL}/auth/login`,
     SIGN_UP: `${BASE_URL}/auth/signup`,
     DELETE_ACCOUNT: `${BASE_URL}/auth/deleteAccount`,
     CREATE_CHALLENGE: `${BASE_URL}/api/challenge/createChallenge`,
+    SEND_MESSAGE: `${BASE_URL}/api/message`, // POST request to this endpoint
     // Other endpoints as constants
     // Dynamic endpoint as a function
     getChallenge: getChallengeEndpoint,
     inviteToChallenge: inviteToChallengeEndpoint,
     acceptInvitation: acceptInvitationEndpoint,
     getInvitations: getInvitationsEndpoint,
+    getMessage: getMessagesEndpoint,
     // other endpoint functions will go here
 };

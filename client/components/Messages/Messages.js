@@ -1,155 +1,181 @@
-import React, { useState } from 'react';
-import { Text ,FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { Text ,FlatList, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { GiftedChat } from 'react-native-gifted-chat';
 
-import users from '../../data/dummyUsers';
+import { AuthContext } from '../../context/AuthContext';
+import { ENDPOINTS } from '../../config/Config';
+
 
 
 const Stack = createStackNavigator();
-/*
-const users = [
-  { id: '1', name: 'Mark' },
-  { id: '2', name: 'Elon' },
-  { id: '3', name: 'Bill' },
-];
-*/
 
 
-const initialMessages = {
-  'Elon Musk': [
-    {
-      _id: 1,
-      text: `Hello, this is a static message from Elon Musk.`,
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: 'Elon Musk',
-      },
-    },
-  ],
-  'Mark Zuckerberg': [
-    {
-      _id: 2,
-      text: `Hello, this is a static message from Mark Zuckerberg.`,
-      createdAt: new Date(),
-      user: {
-        _id: 3,
-        name: 'Mark Zuckerberg',
-        },
-    },
-  ],
-  'Ye': [
-    {
-      _id: 3,
-      text: `🐐🐐🐐🐐🐐🐐🐐🐐🐐🐐🐐🐐.`,
-      createdAt: new Date(),
-      user: {
-        _id: 4,
-        name: 'Ye',
-      },
-    },
-  ],
-  'Serena Williams': [
-    {
-      _id: 4,
-      text: `Hello, this is a static message from Serena Williams.`,
-      createdAt: new Date(),
-      user: {
-        _id: 5,
-        name: 'Serena Williams',
-      },
-    },
-  ],
-  'Bill Gates': [
-    {
-      _id: 5,
-      text: `Hello, this is a static message from Bill Gates.`,
-      createdAt: new Date(),
-      user: {
-        _id: 6,
-        name: 'Bill Gates',
-      },
-    },
-  ],
-  'Leo Messi': [
-    {
-      _id: 6,
-      text: `ANKARA MEEEESSIII`,
-      createdAt: new Date(),
-      user: {
-        _id: 7,
-        name: 'Leo Messi',
-      },
-    },
-  ],
-  'Hasbulla': [
-    {
-      _id: 5,
-      text: `Priviyet from Hasbulla.`,
-      createdAt: new Date(),
-      user: {
-        _id: 6,
-        name: 'Hasbulla',
-      },
-    },
-  ],
-
-};
-
-const UserList = () => {
+const ChallengeList = () => {
+  const [challenges, setChallenges] = useState([]);
+  const { userToken, userID } = useContext(AuthContext);
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      try {
+        const challengeUrl = ENDPOINTS.getChallenge(userID); 
+        const response = await fetch(challengeUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json', 
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch challenges');
+        }
+        const data = await response.json();
+        //console.log("Fetched challenges ", data);
+        setChallenges(data); 
+      } catch (error) {
+        console.error("Error fetching challenges:", error);
+        Alert.alert('Error', 'Failed to load challenges');
+      }
+    };
+
+    fetchChallenges();
+  }, [userID, userToken]);
+  
   return (
     <FlatList
       style={styles.background}
-      data={users}
-      keyExtractor={item => item.id}
+      data={challenges}
+      keyExtractor={(item) => item._id.toString()}
       renderItem={({ item }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.userItem}
-          onPress={() => navigation.navigate('UserChat', { userName: item.name })}
+          onPress={() => navigation.navigate('ChallengeChat', { challengeId: item._id, challengeName: item.name })}
         >
-          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userName}>{item.challengeName}</Text>
         </TouchableOpacity>
       )}
     />
   );
 };
-const UserChat = ({ route }) => {
-  const { userName } = route.params;
- 
-  //Using useState(), messages is our state's current value, and setMessages updates it. 
-  const [messages, setMessages] = useState(initialMessages[userName] || []);
-  //initialMessages[userName] fetches messages for a specific user. 
-  //If no messages exist for the user, an empty array [] is used as a fallback.
-  const handleSend = (newMessages) => {
-    setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessages));
+
+
+const ChallengeChat = ({ route }) => {
+  const { challengeId, challengeName } = route.params;
+  const { userToken, userID } = useContext(AuthContext);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(ENDPOINTS.getMessage(challengeId), {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+          },
+        });
+        const data = await response.json();
+        if (!data.data) {
+          setMessages([]); // If no messages are returned, set an empty array
+          return;
+        }
+        const formattedMessages = data.data.map((msg) => {
+
+          const isCurrentUserMessage = msg.senderId._id.toString() === userID.toString();
+
+          return {
+            _id: msg._id,
+            text: msg.text,
+            createdAt: new Date(msg.createdAt),
+            user: {
+              _id: msg.senderId._id,
+              name: isCurrentUserMessage ? 'You' : msg.senderFullName || 'Unknown',
+            
+            },
+          };
+        }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());//sorted time as as earlier is above
+
+        
+        setMessages(formattedMessages);
+
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        Alert.alert("Error fetching messages:", error.toString());
+      }
+    };
+
+    fetchMessages();
+  }, [challengeId, userToken]);
+
+  const handleSend = async (newMessages = []) => {
+    const sentMessage = newMessages[0];
+    if (!sentMessage || !sentMessage.text) {
+      console.error("No message to send");
+      return;
+    }
+    try {
+      const response = await fetch(ENDPOINTS.SEND_MESSAGE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          challengeId,
+          text: sentMessage.text,
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        // It's crucial that this data structure matches your server's response
+        const newMessage = {
+          _id: data.data._id || data._id, // Depending on your server response structure
+          text: data.data.text || data.text,
+          createdAt: new Date(data.data.createdAt || data.createdAt),
+          user: {
+            _id: userID, // Assuming this is the ID of the logged-in user
+            name: 'You', // Name for the logged-in user
+          },
+        };
+        setMessages(previousMessages => GiftedChat.append(previousMessages, [newMessage]));
+      } else {
+        // If response is not okay, handle it with the message provided by the server or a default message
+        throw new Error(data.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      Alert.alert("Error sending message:", error.message || error.toString());
+    }
   };
+  
+  
 
   return (
     <GiftedChat
       messages={messages}
-      onSend={newMessages => handleSend(newMessages)}
+      onSend={handleSend}
       user={{
-        _id: 1,
-        name: 'You',
-        //avatar:'../data/images/markzuckerberg.jpg',
+        _id: userID,
+        name: 'You', // Replace with user's name if you have it
+        // Add avatar property if you have it
       }}
-      placeholder={`Message ${userName}...`}
+      placeholder={`Write a message`}
     />
   );
 };
 
+
 const Messages = () => {
   return (
-    <Stack.Navigator initialRouteName="UserList">
-      <Stack.Screen name="UserList" component={UserList} options={{ title: 'Users' }} />
-      <Stack.Screen name="UserChat" component={UserChat} options={({ route }) => ({ title: route.params.userName })} />
+    <Stack.Navigator initialRouteName="ChallengeList">
+      <Stack.Screen name="ChallengeList" component={ChallengeList} options={{ title: 'Challenges' }} />
+      <Stack.Screen name="ChallengeChat" component={ChallengeChat} options={({ route }) => ({ title: route.params.challengeName })} />
     </Stack.Navigator>
   );
-}
+};
+
 
 const styles = StyleSheet.create({
   userItem: {

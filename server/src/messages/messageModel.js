@@ -1,25 +1,23 @@
+// /models/Message.js
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const messageSchema = new Schema({
+const messageSchema = new mongoose.Schema({
     challengeId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Challenge',
         required: true
     },
     senderId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     text: {
         type: String,
-        trim: true,
-        required: true
+        required: [true, 'Message text is required'],
     },
     photoUrl: {
         type: String,
-        trim: true,
     },
     createdAt: {
         type: Date,
