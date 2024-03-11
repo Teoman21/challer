@@ -1,8 +1,11 @@
 const express = require('express');
-const { getMessages, sendMessage } = require('./messageController');
+const { postMessage, getMessages } = require('./messageController');
 const router = express.Router();
 
-router.get('/:challengeId', getMessages); 
-router.post('/:challengeId', sendMessage);
+
+router.post('/', postMessage);
+
+// Route for getting messages for a specific challenge
+router.get('/:challengeId', getMessages);
 
 module.exports = router;
