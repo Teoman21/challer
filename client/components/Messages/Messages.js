@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Text ,FlatList, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { GiftedChat } from 'react-native-gifted-chat';
+import io from 'socket.io-client';
 
 import { AuthContext } from '../../context/AuthContext';
-import { ENDPOINTS } from '../../config/Config';
-
-
+import { ENDPOINTS, SOCKET_URL } from '../../config/Config';
 
 const Stack = createStackNavigator();
+
+
 
 
 const ChallengeList = () => {
@@ -20,151 +21,140 @@ const ChallengeList = () => {
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        const challengeUrl = ENDPOINTS.getChallenge(userID); 
+        const challengeUrl = ENDPOINTS.getChallenge(userID);
         const response = await fetch(challengeUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${userToken}`,
-            'Content-Type': 'application/json', 
+            'Content-Type': 'application/json',
           },
         });
-        if (!response.ok) {
-          throw new Error('Failed to fetch challenges');
-        }
+        if (!response.ok) throw new Error('Failed to fetch challenges');
         const data = await response.json();
-        //console.log("Fetched challenges ", data);
-        setChallenges(data); 
+        setChallenges(data);
       } catch (error) {
-        console.error("Error fetching challenges:", error);
-        Alert.alert('Error', 'Failed to load challenges');
+        Alert.alert('Error', error.toString());
       }
     };
 
     fetchChallenges();
   }, [userID, userToken]);
-  
+
   return (
     <FlatList
-      style={styles.background}
-      data={challenges}
-      keyExtractor={(item) => item._id.toString()}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.userItem}
-          onPress={() => navigation.navigate('ChallengeChat', { challengeId: item._id, challengeName: item.name })}
-        >
-          <Text style={styles.userName}>{item.challengeName}</Text>
-        </TouchableOpacity>
-      )}
-    />
-  );
+    style={styles.background}
+    data={challenges}
+    keyExtractor={(item) => item._id.toString()}
+    renderItem={({ item }) => (
+      <TouchableOpacity
+        style={styles.userItem}
+        onPress={() => navigation.navigate('ChallengeChat', { challengeId: item._id, challengeName: item.name })}
+      >
+        <Text style={styles.userName}>{item.challengeName}</Text>
+      </TouchableOpacity>
+    )}
+  />
+);
 };
 
-
 const ChallengeChat = ({ route }) => {
-  const { challengeId, challengeName } = route.params;
+  const { challengeId } = route.params;
   const { userToken, userID } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch(ENDPOINTS.getMessage(challengeId), {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${userToken}`,
-          },
-        });
-        const data = await response.json();
-        if (!data.data) {
-          setMessages([]); // If no messages are returned, set an empty array
-          return;
-        }
-        const formattedMessages = data.data.map((msg) => {
+    // Initialize socket only once
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL, {
+        query: { token: userToken },
+        transports: ['websocket'], // Use WebSocket for transport
+      });
 
-          const isCurrentUserMessage = msg.senderId._id.toString() === userID.toString();
+      socketRef.current.on('connect', () => {
+        console.log('Connected to socket server');
+        socketRef.current.emit('joinRoom', { challengeId });
+      });
 
-          return {
-            _id: msg._id,
-            text: msg.text,
-            createdAt: new Date(msg.createdAt),
-            user: {
-              _id: msg.senderId._id,
-              name: isCurrentUserMessage ? 'You' : msg.senderFullName || 'Unknown',
-            
-            },
-          };
-        }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());//sorted time as as earlier is above
+      socketRef.current.on('newMessage', (newMessage) => {
+        setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessage));
+      });
 
-        
-        setMessages(formattedMessages);
+      // Fetch historical messages
+      fetchMessages();
+    }
 
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-        Alert.alert("Error fetching messages:", error.toString());
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
       }
     };
+  }, [challengeId, userToken, userID]); // Ensure reconnection if these values change
 
-    fetchMessages();
-  }, [challengeId, userToken]);
-
-  const handleSend = async (newMessages = []) => {
-    const sentMessage = newMessages[0];
-    if (!sentMessage || !sentMessage.text) {
-      console.error("No message to send");
-      return;
-    }
+  const fetchMessages = async () => {
     try {
-      const response = await fetch(ENDPOINTS.SEND_MESSAGE, {
-        method: 'POST',
+      const response = await fetch(ENDPOINTS.getMessage(challengeId), {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${userToken}`,
         },
-        body: JSON.stringify({
-          challengeId,
-          text: sentMessage.text,
-        }),
       });
-  
-      const data = await response.json();
-      if (response.ok) {
-        // It's crucial that this data structure matches your server's response
-        const newMessage = {
-          _id: data.data._id || data._id, // Depending on your server response structure
-          text: data.data.text || data.text,
-          createdAt: new Date(data.data.createdAt || data.createdAt),
-          user: {
-            _id: userID, // Assuming this is the ID of the logged-in user
-            name: 'You', // Name for the logged-in user
-          },
-        };
-        setMessages(previousMessages => GiftedChat.append(previousMessages, [newMessage]));
-      } else {
-        // If response is not okay, handle it with the message provided by the server or a default message
-        throw new Error(data.message || 'Failed to send message');
+      const { data } = await response.json();
+    if (data) {
+      // Sort messages by date descending before setting them
+      const sortedMessages = data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setMessages(sortedMessages.map(formatMessage));
       }
     } catch (error) {
-      console.error("Error sending message:", error);
-      Alert.alert("Error sending message:", error.message || error.toString());
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const handleSend = (newMessages = []) => {
+    const message = newMessages[0];
+    if (message && message.text && socketRef.current) {
+      socketRef.current.emit('sendMessage', {
+        challengeId,
+        text: message.text,
+        senderId: userID, // This might not be necessary if your server extracts the sender ID from the token
+      });
     }
   };
   
+
+  // Helper to format message
+  const formatMessage = (msg) => {
+    const isCurrentUserMessage = msg.senderId === userID;
   
+    return {
+      _id: msg._id,
+      text: msg.text,
+      createdAt: new Date(msg.createdAt),
+      user: {
+        _id: isCurrentUserMessage ? userID : msg.senderId._id, // corrected line
+        name: isCurrentUserMessage ? 'You' : msg.senderFullName || 'Unknown',
+      },
+    };
+  };
+  
+  
+  
+
 
   return (
     <GiftedChat
       messages={messages}
-      onSend={handleSend}
-      user={{
-        _id: userID,
-        name: 'You', // Replace with user's name if you have it
-        // Add avatar property if you have it
-      }}
-      placeholder={`Write a message`}
+      onSend={(messages) => handleSend(messages)}
+      user={{ 
+        _id: userID, 
+        name: 'You' }}
+      placeholder="Type a message..."
     />
   );
 };
+
 
 
 const Messages = () => {

@@ -1,11 +1,14 @@
 const express = require('express');
-const { postMessage, getMessages } = require('./messageController');
 const router = express.Router();
 
-
-router.post('/', postMessage);
-
-// Route for getting messages for a specific challenge
-router.get('/:challengeId', getMessages);
-
-module.exports = router;
+// In your messageRouter.js or wherever you set up your routes
+module.exports = function(io) {
+    const router = require('express').Router();
+    const { postMessage, getMessages } = require('./messageController');
+  
+    router.post('/', (req, res) => postMessage(req, res, io));
+    router.get('/:challengeId', getMessages); // No changes here
+  
+    return router;
+  };
+  

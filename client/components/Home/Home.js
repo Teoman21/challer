@@ -247,6 +247,7 @@ const BellBox = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Could not accept invitation');
       Alert.alert('Success', 'Invitation accepted successfully');
+      navigation.goBack();
       // Consider refreshing invitations here
     } catch (error) {
       Alert.alert('Acceptance Error', error.message);
@@ -257,7 +258,7 @@ const BellBox = () => {
     <View style={styles.container}>
       <FlatList
         data={invitations}
-        keyExtractor={item => item._id.toString()} // Ensure your items have an _id field
+        keyExtractor={item => item._id.toString()} 
         renderItem={({ item }) => (
           <View style={styles.notificationItem}>
             <Text style={styles.notificationText}>{item.challengeName || 'No Name'}</Text>

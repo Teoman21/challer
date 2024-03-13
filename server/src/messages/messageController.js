@@ -1,48 +1,54 @@
 // /controllers/messageController.js
 const Message = require('./messageModel');
 
-// Assuming req.user is set by verifyToken middleware
-exports.postMessage = async (req, res) => {
+// Import Message model and other necessary modules
+
+exports.postMessage = async (req, res, io) => {
     try {
-        const { challengeId, text, photoUrl } = req.body;
-        const senderId = req.user._id; // Use the authenticated user's ID
-
-        const message = await Message.create({
-            challengeId,
-            senderId,
-            text,
-            photoUrl
-        });
-
-        // Additional logic like emitting to Socket.IO omitted for brevity
-
-        res.status(201).json({ success: true, data: message });
+      const { challengeId, text } = req.body;
+      const senderId = req.user._id; // Ensure you have user ID available, adjust as needed
+  
+      // Create and save the message to MongoDB
+      const message = new Message({
+        challengeId,
+        senderId,
+        text,
+      });
+  
+      await message.save();
+  
+      // Emit the saved message to all clients in the room, including the sender
+      io.to(challengeId).emit('newMessage', message);
+  
+      // Respond to the HTTP request indicating success
+      res.status(201).json({ message: 'Message sent successfully', data: message });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: 'Error sending message', error: error.toString() });
     }
-};
+  };
+  
 
 
 exports.getMessages = async (req, res) => {
-    try {
-        const { challengeId } = req.params;
-        
-        // Populate the 'senderId' field with the user's 'fullName' from the User collection.
-        const messages = await Message.find({ challengeId })
-                                       .populate('senderId', 'fullName') // Populates only the 'fullName' of the user
-                                       .sort({ createdAt: 1 });
+      try {
+          const { challengeId } = req.params;
+          
+          // The existing functionality remains unchanged as it serves the initial load of messages
+          const messages = await Message.find({ challengeId })
+                                         .populate('senderId', 'fullName')
+                                         .sort({ createdAt: 1 });
 
-        // Construct a new response structure that includes the user's fullName
-        const modifiedMessages = messages.map(message => {
-            return {
-                ...message.toObject(), // Convert the mongoose document to a plain JavaScript object
-                senderFullName: message.senderId.fullName, // Add the sender's fullName to the message object
-            };
-        });
+          const modifiedMessages = messages.map(message => ({
+              ...message.toObject(),
+              senderFullName: message.senderId.fullName,
+          }));
 
-        res.status(200).json({ success: true, count: messages.length, data: modifiedMessages });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
+          res.status(200).json({ success: true, count: messages.length, data: modifiedMessages });
+      } catch (error) {
+          res.status(400).json({ success: false, message: error.message });
+      }
+  };
 
+
+  
