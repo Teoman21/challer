@@ -17,6 +17,8 @@ if (__DEV__) {
     BASE_URL = 'https://your-production-api.com'; // will be handled later
 }
 
+export const SOCKET_URL = BASE_URL.replace(/^http/, 'ws'); // Converting HTTP to WebSocket protocol
+
 // Define functions for endpoints that need to incorporate dynamic values
 const getChallengeEndpoint = (userID) => `${BASE_URL}/api/challenge/getChallenge/${userID}`;
 const inviteToChallengeEndpoint = (challengeId) => `${BASE_URL}/api/challenge/${challengeId}/invite`;
